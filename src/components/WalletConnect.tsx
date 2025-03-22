@@ -1,13 +1,14 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Wallet, Copy, ExternalLink } from "lucide-react";
+import { useNavigate } from 'react-router-dom';
 
 const WalletConnect: React.FC = () => {
   const [connected, setConnected] = useState(false);
   const [connecting, setConnecting] = useState(false);
   const [publicKey, setPublicKey] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
+  const navigate = useNavigate();
 
   const mockConnect = async () => {
     setConnecting(true);
@@ -19,11 +20,26 @@ const WalletConnect: React.FC = () => {
     setPublicKey(mockAddress);
     setConnected(true);
     setConnecting(false);
+
+    // Emit wallet connection event
+    const event = new CustomEvent('walletConnectionChange', {
+      detail: { connected: true, publicKey: mockAddress }
+    });
+    window.dispatchEvent(event);
+
+    // Navigate to pools page
+    navigate('/pools');
   };
 
   const mockDisconnect = async () => {
     setConnected(false);
     setPublicKey(null);
+
+    // Emit wallet disconnection event
+    const event = new CustomEvent('walletConnectionChange', {
+      detail: { connected: false, publicKey: null }
+    });
+    window.dispatchEvent(event);
   };
 
   const copyAddress = () => {

@@ -1,15 +1,23 @@
-
 import React, { useState, useEffect } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 import Header from '@/components/Header';
 import Dashboard from '@/components/Dashboard';
 import WhitelistCheck from '@/components/WhitelistCheck';
+
+interface WalletConnectionEvent extends CustomEvent {
+  detail: {
+    connected: boolean;
+    publicKey: string | null;
+  };
+}
 
 const Index = () => {
   const [loading, setLoading] = useState(true);
   const [walletConnected, setWalletConnected] = useState(false);
   const [publicKey, setPublicKey] = useState<string | null>(null);
   const [betaAccessGranted, setBetaAccessGranted] = useState(false);
+  const navigate = useNavigate();
 
   // Simulate initial loading
   useEffect(() => {
@@ -20,13 +28,16 @@ const Index = () => {
     return () => clearTimeout(timer);
   }, []);
 
-  // Wallet connection state mock
+  // Wallet connection state handler
   useEffect(() => {
-    // Listen for wallet connection events from the WalletConnect component
-    const handleWalletConnection = (event: CustomEvent) => {
+    const handleWalletConnection = (event: WalletConnectionEvent) => {
       if (event.detail.connected) {
         setWalletConnected(true);
         setPublicKey(event.detail.publicKey);
+        // If wallet is connected and beta access is granted, redirect to dashboard
+        if (betaAccessGranted) {
+          navigate('/dashboard');
+        }
       } else {
         setWalletConnected(false);
         setPublicKey(null);
@@ -34,15 +45,19 @@ const Index = () => {
       }
     };
 
-    window.addEventListener('walletConnectionChange' as any, handleWalletConnection);
+    window.addEventListener('walletConnectionChange', handleWalletConnection as EventListener);
     
     return () => {
-      window.removeEventListener('walletConnectionChange' as any, handleWalletConnection);
+      window.removeEventListener('walletConnectionChange', handleWalletConnection as EventListener);
     };
-  }, []);
+  }, [betaAccessGranted, navigate]);
 
   const handleBetaAccess = () => {
     setBetaAccessGranted(true);
+    // If wallet is already connected, redirect to dashboard after beta access is granted
+    if (walletConnected) {
+      navigate('/dashboard');
+    }
   };
 
   if (loading) {
