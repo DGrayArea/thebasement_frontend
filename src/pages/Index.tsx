@@ -105,7 +105,7 @@ const Index = () => {
       
       <footer className="container mx-auto py-8 px-4">
         <div className="flex flex-col md:flex-row justify-between items-center text-xs opacity-50">
-          <div>© 2023 IBF Protocol. All rights reserved.</div>
+          <div>© 2025 IBF Protocol. All rights reserved.</div>
           <div className="flex gap-4 mt-2 md:mt-0">
             <a href="#" className="hover:text-ibf transition-colors duration-200">Terms</a>
             <a href="#" className="hover:text-ibf transition-colors duration-200">Privacy</a>

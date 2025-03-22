@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Lock } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 interface WhitelistCheckProps {
   publicKey: string | null;
@@ -11,6 +12,7 @@ interface WhitelistCheckProps {
 
 const WhitelistCheck: React.FC<WhitelistCheckProps> = ({ publicKey, onAccessGranted }) => {
   const [isChecking, setIsChecking] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (publicKey) {
@@ -29,6 +31,9 @@ const WhitelistCheck: React.FC<WhitelistCheckProps> = ({ publicKey, onAccessGran
     // Grant access to any connected wallet
     setIsChecking(false);
     onAccessGranted();
+    
+    // Redirect to pools page
+    navigate('/pools');
   };
 
   if (!publicKey) {
