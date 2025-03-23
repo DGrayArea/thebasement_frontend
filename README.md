@@ -1,69 +1,67 @@
-# Welcome to your Lovable project
+# Yield Garden Solana
 
-## Project info
+A modern DeFi application for yield farming on Solana, featuring a beautiful UI and user-friendly experience.
 
-**URL**: https://lovable.dev/projects/542a6cb4-8408-42a3-a636-5b150e5bf059
+## Features
 
-## How can I edit this code?
+- Modern, responsive UI with Tailwind CSS
+- Wallet integration with multiple Solana wallet adapters
+- Dashboard with portfolio overview
+- Investment pools for different yield strategies
+- Theme switching (dark/light mode)
+- Mobile-friendly design
+- SEO optimization
 
-There are several ways of editing your application.
+## Technologies Used
 
-**Use Lovable**
+- React with TypeScript
+- Tailwind CSS for styling
+- Solana Web3.js
+- Wallet Adapter integration
+- Framer Motion for animations
+- React Router for navigation
+- React Helmet for SEO
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/542a6cb4-8408-42a3-a636-5b150e5bf059) and start prompting.
+## Getting Started
 
-Changes made via Lovable will be committed automatically to this repo.
+### Prerequisites
 
-**Use your preferred IDE**
+- Node.js (v14+)
+- Yarn or npm
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+### Installation
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
-
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
+1. Clone the repository:
+```
+git clone https://github.com/yourusername/yield-garden-solana.git
+cd yield-garden-solana
 ```
 
-**Edit a file directly in GitHub**
+2. Install dependencies:
+```
+yarn install
+```
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+3. Start the development server:
+```
+yarn dev
+```
 
-**Use GitHub Codespaces**
+4. Open `http://localhost:8080` to view the application in your browser.
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+## Building for Production
 
-## What technologies are used for this project?
+```
+yarn build
+```
 
-This project is built with .
+## License
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+MIT
 
-## How can I deploy this project?
+## Acknowledgements
 
-Simply open [Lovable](https://lovable.dev/projects/542a6cb4-8408-42a3-a636-5b150e5bf059) and click on Share -> Publish.
-
-## I want to use a custom domain - is that possible?
-
-We don't support custom domains (yet). If you want to deploy your project under your own domain then we recommend using Netlify. Visit our docs for more details: [Custom domains](https://docs.lovable.dev/tips-tricks/custom-domain/)
+- [Solana](https://solana.com)
+- [Tailwind CSS](https://tailwindcss.com)
+- [Vite](https://vitejs.dev)
+- [Framer Motion](https://www.framer.com/motion/)

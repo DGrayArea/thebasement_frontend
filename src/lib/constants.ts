@@ -16,9 +16,10 @@ export const WHITELISTED_ADDRESSES = [
 ];
 
 // Mock pool addresses
-export const MOCK_POOL_ADDRESSES = {
-  SOLANA_POOL: "DjXkNNbR8ph6RGhpC4SN2KZbJtQqEUJ9cWxFgQoGcctg",
-  USDC_POOL: "BZnJ6jkpMGc9JEH4HuHC2e6RQmXX6LB3qhUWqPsLCvYk",
+export const MOCK_POOL_ADDRESSES: Record<string, string> = {
+  "1": "8JUjWjAyXTMB4ZXcV7nk3p6Gg1fWAAoSck4b5tqNfY7Z",
+  "2": "DuXVnR4LR2Ck76fa63NgGYkKUvCZVKU6iNBGNUvTmKPp",
+  "3": "HY6Eqbn8oNgCW487UaZkuJDcfwvQ6dGeVQugSUH3xHd5"
 };
 
 // Mock data for UI development
@@ -87,8 +88,8 @@ export const MOCK_YIELD_DATA = [
   { date: "Jul", conservative: 0.4, aggressive: 0.8 },
 ];
 
-// Wallet config
+// Wallet configuration
 export const WALLET_CONFIG = {
-  network: "devnet", // or "mainnet-beta" for production
-  autoConnect: true,
+  network: 'devnet',
+  rpcEndpoint: 'https://api.devnet.solana.com',
 };

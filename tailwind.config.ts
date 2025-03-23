@@ -1,7 +1,9 @@
 import type { Config } from "tailwindcss";
+import { fontFamily } from "tailwindcss/defaultTheme";
+import tailwindcssAnimate from "tailwindcss-animate";
 
-export default {
-	darkMode: "class",
+const config = {
+	darkMode: ["class"],
 	content: [
 		"./pages/**/*.{ts,tsx}",
 		"./components/**/*.{ts,tsx}",
@@ -93,6 +95,9 @@ export default {
 				md: 'calc(var(--radius) - 2px)',
 				sm: 'calc(var(--radius) - 4px)'
 			},
+			fontFamily: {
+				sans: ["var(--font-sans)", ...fontFamily.sans],
+			},
 			keyframes: {
 				'accordion-down': {
 					from: { height: '0' },
@@ -102,9 +107,13 @@ export default {
 					from: { height: 'var(--radix-accordion-content-height)' },
 					to: { height: '0' }
 				},
+				'gradient-x': {
+					'0%, 100%': { backgroundPosition: '0% 50%' },
+					'50%': { backgroundPosition: '100% 50%' },
+				},
 				'pulse-slow': {
-					'0%, 100%': { opacity: '1' },
-					'50%': { opacity: '0.5' }
+					'0%, 100%': { opacity: '0.6' },
+					'50%': { opacity: '0.3' },
 				},
 				'fade-in': {
 					from: { opacity: '0' },
@@ -142,7 +151,9 @@ export default {
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
 				'accordion-up': 'accordion-up 0.2s ease-out',
-				'pulse-slow': 'pulse-slow 3s infinite ease-in-out',
+				'gradient-slow': 'gradient-x 12s ease infinite',
+				'gradient-fast': 'gradient-x 6s ease infinite',
+				'pulse-slow': 'pulse-slow 6s ease-in-out infinite',
 				'fade-in': 'fade-in 0.5s ease-out',
 				'fade-in-up': 'fade-in-up 0.5s ease-out',
 				'fade-out': 'fade-out 0.5s ease-out',
@@ -160,10 +171,16 @@ export default {
 				'neomorphic': '20px 20px 60px #d9d9d9, -20px -20px 60px #ffffff',
 				'neomorphic-dark': '20px 20px 60px #151515, -20px -20px 60px #1f1f1f',
 			},
+			backgroundSize: {
+				'size-200': '200% 200%',
+			},
 			backgroundImage: {
 				'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
+				'grid-pattern': 'linear-gradient(to right, rgba(255, 255, 255, 0.05) 1px, transparent 1px), linear-gradient(to bottom, rgba(255, 255, 255, 0.05) 1px, transparent 1px)',
 			}
 		}
 	},
-	plugins: [require("tailwindcss-animate")],
+	plugins: [tailwindcssAnimate],
 } satisfies Config;
+
+export default config;

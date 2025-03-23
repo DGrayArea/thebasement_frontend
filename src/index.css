@@ -1,3 +1,4 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -14,8 +15,8 @@
     --popover: 0 0% 100%;
     --popover-foreground: 222.2 84% 4.9%;
 
-    --primary: 210 100% 50%;
-    --primary-foreground: 0 0% 100%;
+    --primary: 222.2 47.4% 11.2%;
+    --primary-foreground: 210 40% 98%;
 
     --secondary: 210 40% 96.1%;
     --secondary-foreground: 222.2 47.4% 11.2%;
@@ -31,9 +32,9 @@
 
     --border: 214.3 31.8% 91.4%;
     --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    --ring: 215 20.2% 65.1%;
 
-    --radius: 0.75rem;
+    --radius: 0.5rem;
 
     --sidebar-background: 0 0% 98%;
     --sidebar-foreground: 240 5.3% 26.1%;
@@ -55,7 +56,7 @@
     --popover: 222.2 84% 4.9%;
     --popover-foreground: 210 40% 98%;
 
-    --primary: 217.2 91.2% 59.8%;
+    --primary: 210 40% 98%;
     --primary-foreground: 222.2 47.4% 11.2%;
 
     --secondary: 217.2 32.6% 17.5%;
@@ -68,11 +69,11 @@
     --accent-foreground: 210 40% 98%;
 
     --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive-foreground: 0 85.7% 97.3%;
 
     --border: 217.2 32.6% 17.5%;
     --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
+    --ring: 217.2 32.6% 17.5%;
     
     --sidebar-background: 240 5.9% 10%;
     --sidebar-foreground: 240 4.8% 95.9%;
@@ -94,6 +95,21 @@
     @apply bg-background text-foreground font-sans antialiased;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    font-family: 'Outfit', sans-serif;
+    font-weight: 500;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Outfit', sans-serif;
+    font-weight: 700;
+  }
+
+  button, .font-bold {
+    font-weight: 700 !important;
+  }
+
+  .font-semibold {
+    font-weight: 600 !important;
   }
 }
 
@@ -108,11 +124,11 @@
   }
   
   .neo {
-    @apply bg-ibf-tertiary shadow-neomorphic border border-transparent;
+    @apply bg-slate-200 shadow-neomorphic border border-transparent;
   }
   
   .neo-dark {
-    @apply bg-ibf-dark shadow-neomorphic-dark border border-transparent;
+    @apply bg-slate-800 shadow-neomorphic-dark border border-transparent;
   }
 }
 
@@ -139,6 +155,16 @@
 
 .animate-delay-1000 {
   animation-delay: 1000ms;
+}
+
+/* Reverse animation */
+.reverse {
+  animation-direction: reverse;
+}
+
+/* Custom border sizes */
+.border-3 {
+  border-width: 3px;
 }
 
 /* Solana loader */

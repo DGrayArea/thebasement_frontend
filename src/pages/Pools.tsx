@@ -10,6 +10,8 @@ import { toast } from '@/components/ui/use-toast';
 import { MOCK_POOL_ADDRESSES } from '@/lib/constants';
 import { useTheme } from '@/contexts/ThemeContext';
 import WalletGuard from '@/components/WalletGuard';
+import SEO from '@/components/SEO';
+import Loader from '@/components/Loader';
 
 const MOCK_POOLS: Pool[] = [
   {
@@ -19,49 +21,57 @@ const MOCK_POOLS: Pool[] = [
     apy: 8.5,
     tvl: 250000,
     depositToken: "SOL",
-    strategyDescription: "Stake SOL with top validators",
-    minDeposit: 1,
-    depositCap: 1000,
-    poolAddress: new PublicKey(MOCK_POOL_ADDRESSES.SOLANA_POOL),
-    tokenMint: new PublicKey("So11111111111111111111111111111111111111112"),
+    minDeposit: 0.1,
+    depositCap: 100,
+    lockupPeriod: 7
   },
   {
     id: "2",
-    name: "USDC Yield Pool",
-    description: "Stable yield generation with USDC",
-    apy: 12.2,
+    name: "Yield Farming Alpha",
+    description: "High-yield Solana farming pool",
+    apy: 18.2,
+    tvl: 150000,
+    depositToken: "SOL",
+    minDeposit: 0.5,
+    depositCap: 50,
+    lockupPeriod: 14
+  },
+  {
+    id: "3",
+    name: "USDC Savings",
+    description: "Stable yield with USDC",
+    apy: 5.7,
     tvl: 500000,
     depositToken: "USDC",
-    strategyDescription: "Lending and liquidity provision",
-    minDeposit: 100,
+    minDeposit: 50,
     depositCap: 10000,
-    poolAddress: new PublicKey(MOCK_POOL_ADDRESSES.USDC_POOL),
-    tokenMint: new PublicKey("EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v"),
+    lockupPeriod: 30
   }
 ];
 
-const Pools = () => {
+const Pools: React.FC = () => {
   const [pools, setPools] = useState<Pool[]>([]);
   const [loading, setLoading] = useState(true);
-  const navigate = useNavigate();
   const { publicKey } = useWallet();
+  const navigate = useNavigate();
   const { theme } = useTheme();
 
   useEffect(() => {
-    // Simulate fetching pools data
+    // Simulate API fetch
     const fetchPools = async () => {
-      setLoading(true);
       try {
-        // In a real implementation, we would fetch pools from the blockchain
-        setPools(MOCK_POOLS);
+        // In a real app, you would fetch pool data from your API
+        setTimeout(() => {
+          setPools(MOCK_POOLS);
+          setLoading(false);
+        }, 1000);
       } catch (error) {
         console.error('Error fetching pools:', error);
         toast({
-          variant: "destructive",
-          title: "Error",
-          description: "Failed to fetch pools. Please try again.",
+          title: "Error loading pools",
+          description: "Failed to load investment pools. Please try again later.",
+          variant: "destructive"
         });
-      } finally {
         setLoading(false);
       }
     };
@@ -70,112 +80,115 @@ const Pools = () => {
   }, []);
 
   const handlePoolSelect = (pool: Pool) => {
-    navigate(`/dashboard?pool=${pool.id}`);
+    if (!publicKey) {
+      toast({
+        title: "Wallet not connected",
+        description: "Please connect your wallet to deposit into pools",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    // Navigate to dashboard with selected pool
+    navigate('/dashboard', { state: { selectedPool: pool.id } });
   };
 
   return (
-    <div className="space-y-6">
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-      >
-        <h1 className="text-2xl sm:text-3xl font-bold mb-2">Investment Pools</h1>
-        <p className={`text-sm mb-6 sm:mb-8 ${
-          theme === 'dark' ? 'text-white/70' : 'text-gray-600'
-        }`}>
-          Select a pool to deposit your assets and start generating yield.
-        </p>
+    <>
+      <SEO 
+        title="Investment Pools | Yield Garden"
+        description="Explore and invest in Solana yield farming pools with optimized strategies."
+      />
+      <div className="min-h-screen text-white">
+        <div className="container mx-auto pt-24 px-4 pb-16">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+          >
+            <div className="mb-8">
+              <h1 className={`text-4xl font-extrabold mb-4 ${theme === 'dark' ? 'text-white' : 'text-black'}`}>Investment Pools</h1>
+              <p className={`text-lg font-bold ${theme === 'dark' ? 'text-white/70' : 'text-gray-600'}`}>
+                Explore our carefully curated yield farming strategies and invest with confidence.
+              </p>
+            </div>
 
-        {loading ? (
-          <div className="flex justify-center items-center py-20">
-            <div className="w-8 h-8 rounded-full border-2 border-blue-400 border-t-transparent animate-spin"></div>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
-            {pools.map((pool) => (
-              <motion.div
-                key={pool.id}
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.5, delay: 0.2 }}
-              >
-                <Card className={`backdrop-blur-sm border p-4 sm:p-6 h-full ${
-                  theme === 'dark' 
-                    ? 'bg-white/5 border-white/10'
-                    : 'bg-white border-gray-200'
-                }`}>
-                  <div className="flex flex-col h-full">
-                    <div className="mb-4">
-                      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-2">
-                        <div>
-                          <h3 className="text-lg sm:text-xl font-semibold mb-1">{pool.name}</h3>
-                          <p className={theme === 'dark' ? 'text-white/70' : 'text-gray-600'}>
-                            {pool.description}
-                          </p>
-                        </div>
-                        <div className="bg-gradient-to-r from-[#0D47A1] to-[#4A1D96] rounded-md px-3 py-1 text-white font-medium text-sm">
-                          {pool.apy}% APY
-                        </div>
-                      </div>
-                    </div>
-                    
-                    <div className="space-y-4 mb-6 flex-grow">
-                      <div className={`rounded-lg p-3 sm:p-4 ${
-                        theme === 'dark' ? 'bg-white/5' : 'bg-gray-50'
-                      }`}>
-                        <div className="grid grid-cols-2 gap-3 sm:gap-4">
-                          <div>
-                            <p className={`text-xs mb-1 ${
-                              theme === 'dark' ? 'text-white/70' : 'text-gray-600'
-                            }`}>Total Value Locked</p>
-                            <p className="font-semibold">${pool.tvl.toLocaleString()}</p>
+            {loading ? (
+              <div className="flex justify-center items-center py-20">
+                <Loader size="lg" text="Loading pools..." />
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {pools.map((pool) => (
+                  <motion.div
+                    key={pool.id}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.3, delay: parseInt(pool.id) * 0.1 }}
+                  >
+                    <Card className={`overflow-hidden h-full backdrop-blur-sm border ${
+                      theme === 'dark' ? 'bg-white/5 border-white/10' : 'bg-white border-gray-200'
+                    }`}>
+                      <div className="p-6 flex flex-col h-full">
+                        <div className="flex-grow space-y-4 mb-6">
+                          <div className="flex justify-between items-start">
+                            <div>
+                              <h3 className={`font-extrabold text-xl mb-1 ${theme === 'dark' ? 'text-white' : 'text-black'}`}>{pool.name}</h3>
+                              <p className={`font-bold ${theme === 'dark' ? 'text-white/70' : 'text-gray-600'}`}>
+                                {pool.description}
+                              </p>
+                            </div>
+                            <div className="bg-gradient-to-r from-blue-600 to-purple-600 px-3 py-1 rounded-full">
+                              <p className="text-white font-extrabold">{pool.apy}% APY</p>
+                            </div>
                           </div>
-                          <div>
-                            <p className={`text-xs mb-1 ${
-                              theme === 'dark' ? 'text-white/70' : 'text-gray-600'
-                            }`}>Deposit Token</p>
-                            <p className="font-semibold">{pool.depositToken}</p>
-                          </div>
-                          <div>
-                            <p className={`text-xs mb-1 ${
-                              theme === 'dark' ? 'text-white/70' : 'text-gray-600'
-                            }`}>Minimum Deposit</p>
-                            <p className="font-semibold">{pool.minDeposit} {pool.depositToken}</p>
-                          </div>
-                          <div>
-                            <p className={`text-xs mb-1 ${
-                              theme === 'dark' ? 'text-white/70' : 'text-gray-600'
-                            }`}>Deposit Cap</p>
-                            <p className="font-semibold">{pool.depositCap} {pool.depositToken}</p>
-                          </div>
-                        </div>
-                      </div>
 
-                      <div className={`rounded-lg p-3 sm:p-4 ${
-                        theme === 'dark' ? 'bg-white/5' : 'bg-gray-50'
-                      }`}>
-                        <p className={`text-xs mb-2 ${
-                          theme === 'dark' ? 'text-white/70' : 'text-gray-600'
-                        }`}>Strategy</p>
-                        <p className="text-sm">{pool.strategyDescription}</p>
+                          <div className="mt-4">
+                            <div className="grid grid-cols-2 gap-3 sm:gap-4">
+                              <div>
+                                <p className={`text-xs font-bold mb-1 ${
+                                  theme === 'dark' ? 'text-white/70' : 'text-gray-600'
+                                }`}>Total Value Locked</p>
+                                <p className="font-extrabold">${pool.tvl.toLocaleString()}</p>
+                              </div>
+                              <div>
+                                <p className={`text-xs font-bold mb-1 ${
+                                  theme === 'dark' ? 'text-white/70' : 'text-gray-600'
+                                }`}>Deposit Token</p>
+                                <p className="font-extrabold">{pool.depositToken}</p>
+                              </div>
+                              <div>
+                                <p className={`text-xs font-bold mb-1 ${
+                                  theme === 'dark' ? 'text-white/70' : 'text-gray-600'
+                                }`}>Minimum Deposit</p>
+                                <p className="font-extrabold">{pool.minDeposit} {pool.depositToken}</p>
+                              </div>
+                              <div>
+                                <p className={`text-xs font-bold mb-1 ${
+                                  theme === 'dark' ? 'text-white/70' : 'text-gray-600'
+                                }`}>Lockup Period</p>
+                                <p className="font-extrabold">{pool.lockupPeriod} days</p>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                        
+                        <Button 
+                          className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white w-full font-extrabold"
+                          onClick={() => handlePoolSelect(pool)}
+                        >
+                          {publicKey ? `Deposit to ${pool.name}` : 'Connect Wallet to Deposit'}
+                        </Button>
                       </div>
-                    </div>
-                    
-                    <Button 
-                      className="bg-gradient-to-r from-[#0D47A1] to-[#4A1D96] hover:from-[#0A3984] hover:to-[#3B1773] text-white w-full"
-                      onClick={() => handlePoolSelect(pool)}
-                    >
-                      {publicKey ? `Deposit to ${pool.name}` : 'Connect Wallet to Deposit'}
-                    </Button>
-                  </div>
-                </Card>
-              </motion.div>
-            ))}
-          </div>
-        )}
-      </motion.div>
-    </div>
+                    </Card>
+                  </motion.div>
+                ))}
+              </div>
+            )}
+          </motion.div>
+        </div>
+      </div>
+    </>
   );
 };
 

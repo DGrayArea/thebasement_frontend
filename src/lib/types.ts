@@ -7,11 +7,9 @@ export interface Pool {
   apy: number;
   tvl: number;
   depositToken: string;
-  strategyDescription: string;
   minDeposit: number;
   depositCap: number;
-  poolAddress: PublicKey;
-  tokenMint: PublicKey;
+  lockupPeriod: number;
 }
 
 export interface Transaction {
