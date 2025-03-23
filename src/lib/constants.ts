@@ -1,4 +1,3 @@
-
 export const APP_NAME = "IBF Protocol";
 export const APP_DESCRIPTION = "Solana-based yield generation protocol";
 export const APP_VERSION = "0.1.0 (Beta)";
@@ -14,8 +13,13 @@ export const WHITELISTED_ADDRESSES = [
   "8YLKoCr5Nz5RgzPHjYwsNnKEZNKKcNoWmUAKVuBsZmW6",
   "6PEFnCnrK4dYTRAKTFHRxeQMoDvBw5jnF4XMmAwANgTZ",
   "HhJpBhRRn4g56VsyUBb9HXcWRMJGiX1KrNGM3EQues8o",
-  // Add more addresses as needed
 ];
+
+// Mock pool addresses
+export const MOCK_POOL_ADDRESSES = {
+  SOLANA_POOL: "DjXkNNbR8ph6RGhpC4SN2KZbJtQqEUJ9cWxFgQoGcctg",
+  USDC_POOL: "BZnJ6jkpMGc9JEH4HuHC2e6RQmXX6LB3qhUWqPsLCvYk",
+};
 
 // Mock data for UI development
 export const MOCK_POOLS = [

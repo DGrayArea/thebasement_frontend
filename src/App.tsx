@@ -1,17 +1,15 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { WalletAdapterNetwork } from '@solana/wallet-adapter-base';
 import { ConnectionProvider, WalletProvider } from '@solana/wallet-adapter-react';
 import { WalletModalProvider } from '@solana/wallet-adapter-react-ui';
 import { PhantomWalletAdapter } from '@solana/wallet-adapter-wallets';
 import { clusterApiUrl } from '@solana/web3.js';
-import { AnimatePresence } from 'framer-motion';
 import '@solana/wallet-adapter-react-ui/styles.css';
-import Header from './components/Header';
-import Index from './pages/Index';
+import { ThemeProvider } from '@/contexts/ThemeContext';
+import Layout from './components/Layout';
 import Dashboard from './pages/Dashboard';
 import Pools from './pages/Pools';
-import ProtectedRoute from './components/ProtectedRoute';
 
 const App: React.FC = () => {
   // Set up Solana network
@@ -20,38 +18,24 @@ const App: React.FC = () => {
   const wallets = [new PhantomWalletAdapter()];
 
   return (
-    <ConnectionProvider endpoint={endpoint}>
-      <WalletProvider wallets={wallets} autoConnect>
-        <WalletModalProvider>
-          <Router>
-            <div className="min-h-screen bg-gradient-to-b from-gray-900 to-black">
-              <Header />
-              <AnimatePresence mode="wait">
+    <ThemeProvider>
+      <ConnectionProvider endpoint={endpoint}>
+        <WalletProvider wallets={wallets} autoConnect>
+          <WalletModalProvider>
+            <Router>
+              <Layout>
                 <Routes>
-                  <Route path="/" element={<Index />} />
-                  <Route 
-                    path="/dashboard" 
-                    element={
-                      <ProtectedRoute>
-                        <Dashboard />
-                      </ProtectedRoute>
-                    } 
-                  />
-                  <Route 
-                    path="/pools" 
-                    element={
-                      <ProtectedRoute>
-                        <Pools />
-                      </ProtectedRoute>
-                    } 
-                  />
+                  <Route path="/" element={<Navigate to="/dashboard" replace />} />
+                  <Route path="/dashboard" element={<Dashboard />} />
+                  <Route path="/pools" element={<Pools />} />
+                  <Route path="*" element={<Navigate to="/dashboard" replace />} />
                 </Routes>
-              </AnimatePresence>
-            </div>
-          </Router>
-        </WalletModalProvider>
-      </WalletProvider>
-    </ConnectionProvider>
+              </Layout>
+            </Router>
+          </WalletModalProvider>
+        </WalletProvider>
+      </ConnectionProvider>
+    </ThemeProvider>
   );
 };
 

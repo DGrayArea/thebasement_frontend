@@ -1,42 +1,64 @@
-
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Lock } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useWallet } from '@solana/wallet-adapter-react';
+import { WHITELISTED_ADDRESSES } from '@/lib/constants';
+import { toast } from '@/components/ui/use-toast';
 
 interface WhitelistCheckProps {
-  publicKey: string | null;
   onAccessGranted: () => void;
 }
 
-const WhitelistCheck: React.FC<WhitelistCheckProps> = ({ publicKey, onAccessGranted }) => {
+const WhitelistCheck: React.FC<WhitelistCheckProps> = ({ onAccessGranted }) => {
   const [isChecking, setIsChecking] = useState(false);
+  const { publicKey, connected } = useWallet();
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (publicKey) {
+    if (connected && publicKey) {
       checkAccess();
     }
-  }, [publicKey]);
+  }, [connected, publicKey]);
 
   const checkAccess = async () => {
     if (!publicKey) return;
     
     setIsChecking(true);
     
-    // Simulate API call delay
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    // Grant access to any connected wallet
-    setIsChecking(false);
-    onAccessGranted();
-    
-    // Redirect to pools page
-    navigate('/pools');
+    try {
+      // Check if the wallet address is whitelisted
+      const isWhitelisted = WHITELISTED_ADDRESSES.includes(publicKey.toString());
+      
+      if (isWhitelisted) {
+        onAccessGranted();
+        navigate('/pools');
+        toast({
+          title: "Access Granted",
+          description: "Welcome to IBF Protocol Beta!",
+        });
+      } else {
+        toast({
+          variant: "destructive",
+          title: "Access Denied",
+          description: "Your wallet is not whitelisted for the beta.",
+        });
+        navigate('/');
+      }
+    } catch (error) {
+      console.error('Error checking whitelist:', error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to verify whitelist status. Please try again.",
+      });
+    } finally {
+      setIsChecking(false);
+    }
   };
 
-  if (!publicKey) {
+  if (!connected) {
     return (
       <motion.div
         initial={{ opacity: 0, scale: 0.9 }}
@@ -69,7 +91,7 @@ const WhitelistCheck: React.FC<WhitelistCheckProps> = ({ publicKey, onAccessGran
           <div className="solana-loader mb-4"></div>
           <h2 className="text-2xl font-semibold mb-2">Verifying Access</h2>
           <p className="text-sm opacity-70 mb-6">
-            Connecting to the beta...
+            Checking whitelist status...
           </p>
         </div>
       </motion.div>

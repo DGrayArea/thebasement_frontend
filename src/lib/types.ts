@@ -1,3 +1,4 @@
+import { PublicKey } from '@solana/web3.js';
 
 export interface Pool {
   id: string;
@@ -9,6 +10,8 @@ export interface Pool {
   strategyDescription: string;
   minDeposit: number;
   depositCap: number;
+  poolAddress: PublicKey;
+  tokenMint: PublicKey;
 }
 
 export interface Transaction {
@@ -19,6 +22,8 @@ export interface Transaction {
   timestamp: string;
   status: string;
   txHash: string;
+  sender?: PublicKey;
+  receiver?: PublicKey;
 }
 
 export interface YieldDataPoint {
@@ -39,9 +44,23 @@ export interface DepositFormData {
   amount: number;
   token: string;
   poolId: string;
+  poolAddress: PublicKey;
+  tokenMint: PublicKey;
 }
 
 export interface ChartData {
   name: string;
   value: number;
+}
+
+export interface PoolState {
+  totalDeposits: number;
+  totalYield: number;
+  lastDistribution: Date;
+  depositTokenBalance: number;
+  yieldTokenBalance: number;
+  depositTokenMint: PublicKey;
+  yieldTokenMint: PublicKey;
+  authority: PublicKey;
+  isLocked: boolean;
 }
