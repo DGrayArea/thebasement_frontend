@@ -9,8 +9,8 @@ interface SEOProps {
 }
 
 const SEO: React.FC<SEOProps> = ({
-  title = 'Yield Garden | Solana DeFi Protocol',
-  description = 'Yield Garden is a cutting-edge DeFi protocol built on Solana, offering optimized yield farming strategies.',
+  title = 'The Basement | Solana DeFi Protocol',
+  description = 'The Basement is a cutting-edge DeFi protocol built on Solana, offering optimized yield farming strategies.',
   image = '/logo.png',
   url = window.location.href,
 }) => {
@@ -41,10 +41,10 @@ const SEO: React.FC<SEOProps> = ({
       
       {/* Additional Meta Tags */}
       <meta name="theme-color" content="#0D47A1" />
-      <meta name="application-name" content="Yield Garden" />
+      <meta name="application-name" content="The Basement" />
       <meta name="apple-mobile-web-app-capable" content="yes" />
       <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-      <meta name="apple-mobile-web-app-title" content="Yield Garden" />
+      <meta name="apple-mobile-web-app-title" content="The Basement" />
       
       {/* Favicon Tags */}
       <link rel="icon" href="/favicon.ico" />

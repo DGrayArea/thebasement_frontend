@@ -62,7 +62,7 @@ const WalletGuard: React.FC<{ children: React.ReactNode }> = ({ children }) => {
             <p className={`text-sm font-bold mb-5 ${
               theme === 'dark' ? 'text-white/70' : 'text-gray-600'
             }`}>
-              Connect your wallet to access the IBF Protocol beta
+              Connect your wallet to access The Basement beta
             </p>
           </div>
           

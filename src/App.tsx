@@ -58,7 +58,7 @@ class ErrorBoundary extends React.Component<{children: React.ReactNode}, {hasErr
 // Loading component
 const LoadingScreen = () => (
   <div className="min-h-screen flex items-center justify-center">
-    <Loader size="lg" text="Loading Yield Garden..." />
+    <Loader size="lg" text="Loading The Basement..." />
   </div>
 );
 

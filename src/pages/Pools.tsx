@@ -96,8 +96,8 @@ const Pools: React.FC = () => {
   return (
     <>
       <SEO 
-        title="Investment Pools | Yield Garden"
-        description="Explore and invest in Solana yield farming pools with optimized strategies."
+        title="Investment Pools | The Basement"
+        description="Explore and invest in The Basement's yield farming pools."
       />
       <div className="min-h-screen text-white">
         <div className="container mx-auto pt-24 px-4 pb-16">

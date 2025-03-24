@@ -131,7 +131,7 @@ const MobileNav: React.FC<MobileNavProps> = ({ isOpen, onClose }) => {
               <p className={`text-xs ${
                 theme === 'dark' ? 'text-white/50' : 'text-gray-500'
               }`}>
-                © 2025 IBF Protocol
+                © 2025 The Basement
               </p>
             </div>
           </motion.div>

@@ -46,7 +46,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             <div className={`text-center text-sm ${
               theme === 'dark' ? 'text-white/40' : 'text-gray-500'
             }`}>
-              © 2025 IBF Protocol. All rights reserved.
+              © 2025 The Basement. All rights reserved.
             </div>
           </div>
         </div>

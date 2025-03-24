@@ -1,4 +1,4 @@
-# Yield Garden Solana
+# The Basement Solana
 
 A modern DeFi application for yield farming on Solana, featuring a beautiful UI and user-friendly experience.
 

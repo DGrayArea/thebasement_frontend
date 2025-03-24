@@ -36,7 +36,7 @@ const WhitelistCheck: React.FC<WhitelistCheckProps> = ({ onAccessGranted }) => {
         navigate('/pools');
         toast({
           title: "Access Granted",
-          description: "Welcome to IBF Protocol Beta!",
+          description: "Welcome to The Basement Beta!",
         });
       } else {
         toast({
@@ -72,7 +72,7 @@ const WhitelistCheck: React.FC<WhitelistCheckProps> = ({ onAccessGranted }) => {
           </div>
           <h2 className="text-2xl font-semibold mb-2">Beta Access</h2>
           <p className="text-sm opacity-70 mb-6">
-            Connect your wallet to access the IBF Protocol beta.
+            Connect your wallet to access The Basement beta.
           </p>
         </div>
       </motion.div>

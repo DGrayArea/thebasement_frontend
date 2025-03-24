@@ -147,8 +147,8 @@ const Dashboard: React.FC = () => {
   return (
     <>
       <SEO 
-        title="Dashboard | Yield Garden"
-        description="View your Solana portfolio and yield farming positions in the Yield Garden protocol."
+        title="Dashboard | The Basement"
+        description="View your Solana portfolio and yield farming positions in The Basement protocol."
       />
       <div className="min-h-screen text-white">
         <main className="container mx-auto pt-24 px-4 pb-16">
@@ -167,7 +167,7 @@ const Dashboard: React.FC = () => {
             <div className="absolute inset-0 bg-gradient-to-r from-[#0D47A1]/80 to-[#4A1D96]/80 backdrop-blur-sm"></div>
             <div className="absolute inset-0 flex items-center justify-center">
               <div className="text-center">
-                <h1 className="text-3xl md:text-4xl font-extrabold text-white mb-2">Welcome to IBF Protocol</h1>
+                <h1 className="text-3xl md:text-4xl font-extrabold text-white mb-2">Welcome to The Basement</h1>
                 <p className={`text-lg font-bold ${theme === 'dark' ? 'text-white/70' : 'text-gray-200'}`}>
                   Your gateway to decentralized yield generation
                 </p>

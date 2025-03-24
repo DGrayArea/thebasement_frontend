@@ -32,13 +32,13 @@ const Header: React.FC = () => {
               <div className="relative w-9 h-9 overflow-hidden rounded-full ring-2 ring-blue-500/20 transition-all duration-200 group-hover:ring-blue-500/50">
                 <img
                   src="/IMG_20250322_191654_721.jpg"
-                  alt="Yield Garden"
+                  alt="The Basement"
                   className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
                 />
                 <div className="absolute inset-0 bg-gradient-to-tr from-blue-600/20 to-purple-600/20 opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
               </div>
               <span className="text-xl font-extrabold bg-gradient-to-r from-[#0D47A1] to-[#4A1D96] bg-clip-text text-transparent">
-                Yield Garden
+                The Basement
               </span>
             </Link>
 

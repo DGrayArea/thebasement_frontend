@@ -1,4 +1,4 @@
-export const APP_NAME = "IBF Protocol";
+export const APP_NAME = "The Basement";
 export const APP_DESCRIPTION = "Solana-based yield generation protocol";
 export const APP_VERSION = "0.1.0 (Beta)";
 
