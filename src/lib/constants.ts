@@ -19,8 +19,10 @@ export const WHITELISTED_ADDRESSES = [
 export const MOCK_POOL_ADDRESSES: Record<string, string> = {
   "1": "8JUjWjAyXTMB4ZXcV7nk3p6Gg1fWAAoSck4b5tqNfY7Z",
   "2": "DuXVnR4LR2Ck76fa63NgGYkKUvCZVKU6iNBGNUvTmKPp",
-  "3": "HY6Eqbn8oNgCW487UaZkuJDcfwvQ6dGeVQugSUH3xHd5"
+  "3": "HY6Eqbn8oNgCW487UaZkuJDcfwvQ6dGeVQugSUH3xHd5",
 };
+
+export const poolAccount = "Ehsv5GCUBr9LEBvU5SKuUrTYypMHA9d8iy3ztkLUUion";
 
 // Mock data for UI development
 export const MOCK_POOLS = [
@@ -42,7 +44,8 @@ export const MOCK_POOLS = [
     apy: 12.8,
     tvl: 75000,
     depositToken: "SOL",
-    strategyDescription: "Yield farming + Trading strategies on volatile assets",
+    strategyDescription:
+      "Yield farming + Trading strategies on volatile assets",
     minDeposit: 1,
     depositCap: 100000,
   },
@@ -90,6 +93,6 @@ export const MOCK_YIELD_DATA = [
 
 // Wallet configuration
 export const WALLET_CONFIG = {
-  network: 'devnet',
-  rpcEndpoint: 'https://api.devnet.solana.com',
+  network: "devnet",
+  rpcEndpoint: "https://api.devnet.solana.com",
 };
