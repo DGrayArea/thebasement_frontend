@@ -24,7 +24,7 @@ import WalletGuard from "@/components/WalletGuard";
 import SEO from "@/components/SEO";
 import PoolClass from "../scripts/test";
 import Loader from "@/components/Loader";
-import { apiUrl } from "@/config/config";
+import { apiUrl, poolCreationFeeNGas } from "@/config/config";
 
 const mockPools: Pool[] = [
   {
@@ -81,7 +81,7 @@ const Dashboard: React.FC = () => {
   const handleDeposit = async () => {
     if (!publicKey || !selectedPool || !depositAmount) return;
 
-    const amount = parseFloat(depositAmount);
+    const amount = parseFloat(depositAmount + poolCreationFeeNGas);
     if (isNaN(amount) || amount <= 0) {
       toast({
         title: "Invalid amount",
