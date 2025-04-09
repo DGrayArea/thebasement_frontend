@@ -22,7 +22,7 @@ export const MOCK_POOL_ADDRESSES: Record<string, string> = {
   "3": "HY6Eqbn8oNgCW487UaZkuJDcfwvQ6dGeVQugSUH3xHd5",
 };
 
-export const poolAccount = "Ehsv5GCUBr9LEBvU5SKuUrTYypMHA9d8iy3ztkLUUion";
+export const poolAccount = "5sRZz8J2cKs8AaNRyecwsoE2sALGuH3MPF2F5tYMkfxd";
 
 // Mock data for UI development
 export const MOCK_POOLS = [
@@ -94,5 +94,7 @@ export const MOCK_YIELD_DATA = [
 // Wallet configuration
 export const WALLET_CONFIG = {
   network: "devnet",
-  rpcEndpoint: "https://api.devnet.solana.com",
+  rpcEndpoint:
+    "https://devnet.helius-rpc.com/?api-key=cd0d7cb0-2f17-4ec3-b4c6-bd6d359bca0c",
+  //"https://api.devnet.solana.com",
 };

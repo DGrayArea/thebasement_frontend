@@ -1,9 +1,10 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
-import { ArrowDown, ArrowUp, Wallet, TrendingUp, Lock } from "lucide-react";
+import { Wallet, TrendingUp, Lock } from "lucide-react";
 import { useWallet } from "@solana/wallet-adapter-react";
 import {
   Connection,
@@ -12,7 +13,7 @@ import {
   SystemProgram,
   LAMPORTS_PER_SOL,
 } from "@solana/web3.js";
-import { toast } from "@/components/ui/use-toast";
+// import { toast } from "@/components/ui/use-toast";
 import {
   WALLET_CONFIG,
   MOCK_POOL_ADDRESSES,
@@ -22,9 +23,16 @@ import { Pool } from "@/lib/types";
 import { useTheme } from "@/contexts/ThemeContext";
 import WalletGuard from "@/components/WalletGuard";
 import SEO from "@/components/SEO";
-import PoolClass from "../scripts/test";
 import Loader from "@/components/Loader";
 import { apiUrl, poolCreationFeeNGas } from "@/config/config";
+import axios from "axios";
+import toast, { Toaster } from "react-hot-toast";
+import {
+  cleanupPolls,
+  monitorTransaction,
+  sendFundsTransaction,
+  submitStakeTransaction,
+} from "@/helpers";
 
 const mockPools: Pool[] = [
   {
@@ -35,7 +43,7 @@ const mockPools: Pool[] = [
     tvl: 250000,
     depositToken: "SOL",
     minDeposit: 0.1,
-    depositCap: 100,
+    depositCap: 2,
     lockupPeriod: 7,
   },
   {
@@ -54,8 +62,32 @@ const mockPools: Pool[] = [
 const Dashboard: React.FC = () => {
   const [selectedPool, setSelectedPool] = useState<Pool | null>(null);
   const [depositAmount, setDepositAmount] = useState<string>("");
+  const [withdrawPercentage, setWithdrawPercentage] = useState<number>(0);
   const [balance, setBalance] = useState<number>(0);
   const [loading, setLoading] = useState<boolean>(false);
+  interface PoolData {
+    pool: {
+      totalSOL: number;
+      totalTokens: number;
+      totalSharePoints: number;
+      currentPrice: number;
+      poolValue: number;
+    };
+    user: {
+      walletAddress: string;
+      sharePoints: number;
+      ownershipPercent: number;
+      estimatedValueInSOL: number;
+      totalDeposited: number;
+      entryPrice: number;
+      depositHistory: number;
+      withdrawHistory: unknown[];
+      totalWithdrawnSOL: number;
+      totalWithdrawnTokens: number;
+    };
+  }
+
+  const [userData, setUserData] = useState<PoolData | null>(null);
 
   const { publicKey, connected, sendTransaction } = useWallet();
   const { theme } = useTheme();
@@ -78,41 +110,80 @@ const Dashboard: React.FC = () => {
     return () => clearInterval(interval);
   }, [publicKey]);
 
+  useEffect(() => {
+    const fetchBalance = async () => {
+      if (publicKey) {
+        try {
+          const response = await axios.get(`${apiUrl}dlmm/user/${publicKey}`);
+          setUserData(response.data);
+        } catch (error) {
+          console.error("Error fetching balance:", error);
+        }
+      }
+    };
+
+    fetchBalance();
+  }, [publicKey]);
+
+  useEffect(() => {
+    return () => {
+      cleanupPolls();
+    };
+  }, []);
+
   const handleDeposit = async () => {
     if (!publicKey || !selectedPool || !depositAmount) return;
 
-    const amount = parseFloat(depositAmount + poolCreationFeeNGas);
+    const amount = Number(depositAmount);
+    const depositValue = Number(
+      Number(depositAmount) + Number(poolCreationFeeNGas)
+    );
     if (isNaN(amount) || amount <= 0) {
-      toast({
-        title: "Invalid amount",
-        description: "Please enter a valid amount to deposit",
-        variant: "destructive",
-      });
+      toast.error(
+        "Invalid amount. \n Please enter a valid amount to deposit.",
+        {
+          style: {
+            background: "#f87171",
+            color: "#fff",
+          },
+          icon: "❌",
+        }
+      );
       return;
     }
 
     if (amount < selectedPool.minDeposit) {
-      toast({
-        title: "Deposit too low",
-        description: `Minimum deposit is ${selectedPool.minDeposit} ${selectedPool.depositToken}`,
-        variant: "destructive",
-      });
+      toast.error(
+        `Deposit too low. \n Minimum deposit is ${selectedPool.minDeposit} ${selectedPool.depositToken}.`,
+        {
+          style: {
+            background: "#f87171",
+            color: "#fff",
+          },
+          icon: "⚠️",
+        }
+      );
       return;
     }
 
     if (amount > selectedPool.depositCap) {
-      toast({
-        title: "Deposit too high",
-        description: `Maximum deposit is ${selectedPool.depositCap} ${selectedPool.depositToken}`,
-        variant: "destructive",
-      });
+      toast.error(
+        `Deposit too high. \n Maximum deposit is ${selectedPool.depositCap} ${selectedPool.depositToken}.`,
+        {
+          style: {
+            background: "#f87171",
+            color: "#fff",
+          },
+          icon: "⚠️",
+        }
+      );
       return;
     }
 
     try {
       setLoading(true);
+      const toastId = toast.loading("Deposit Loading...");
 
-      // This is a mock transaction - in a real app, you would interact with your program
       const connection = new Connection(WALLET_CONFIG.rpcEndpoint);
       const poolAddress = MOCK_POOL_ADDRESSES[selectedPool.id];
 
@@ -120,59 +191,158 @@ const Dashboard: React.FC = () => {
         throw new Error("Pool address not found");
       }
 
-      const transaction = new Transaction().add(
-        SystemProgram.transfer({
-          fromPubkey: publicKey,
-          toPubkey: new PublicKey(poolAccount),
-          lamports: amount * LAMPORTS_PER_SOL,
-        })
+      const sendTx = await sendFundsTransaction(
+        depositValue,
+        publicKey,
+        sendTransaction,
+        connection
       );
 
-      const signature = await sendTransaction(transaction, connection);
+      if (!sendTx.success) {
+        toast.error("Transaction failed", { id: toastId });
+        return;
+      }
 
-      const latestBlockhash = await connection.getLatestBlockhash("finalized");
-      await connection.confirmTransaction(
-        {
-          signature: signature,
-          blockhash: latestBlockhash.blockhash,
-          lastValidBlockHeight: latestBlockhash.lastValidBlockHeight,
-        },
-        "finalized"
+      const stakeResult = await submitStakeTransaction(
+        amount,
+        publicKey.toBase58(),
+        6
       );
-      // await connection.confirmTransaction(signature, 'processed');
-      // const axiosdepositResponse = await axios.post(apiUrl + "dlmm/stake", {
-      //   amount,
-      //   decimals,
-      //   userPublicKey
-      // })
 
-      // const axiosWithdrawResponse = await axios.post(apiUrl + "dlmm/unstake", {
-      //   userPublicKey,
-      //   shares,
-      //   unstakePercentage,
-      // });
+      if (stakeResult.success && stakeResult.txId) {
+        toast.loading(`Processing stake transaction...`, {
+          id: toastId,
+        });
 
-      toast({
-        title: "Deposit successful",
-        description: `You have deposited ${amount} ${selectedPool.depositToken} to ${selectedPool.name}`,
-        variant: "default",
-      });
+        const onComplete = (result: any): void => {
+          toast.success(
+            `Deposit successful.\n You have deposited ${amount} ${selectedPool.depositToken} to ${selectedPool.name}`,
+            {
+              id: toastId,
+            }
+          );
+        };
 
-      // Reset form
+        const onFail = (error: string): void => {
+          toast.error(`Staking failed: ${error}`, {
+            id: toastId,
+          });
+        };
+
+        monitorTransaction(stakeResult.txId, onComplete, onFail);
+      } else {
+        toast.error(`Failed to initiate staking: ${stakeResult.error}`, {
+          id: toastId,
+        });
+      }
+
       setDepositAmount("");
       setSelectedPool(null);
 
-      // Refresh balance
       const newBalance = await connection.getBalance(publicKey);
       setBalance(newBalance / LAMPORTS_PER_SOL);
     } catch (error) {
       console.error("Error depositing:", error);
-      toast({
-        title: "Deposit failed",
-        description:
-          "There was an error processing your deposit. Please try again.",
-        variant: "destructive",
+      toast.error(
+        "There was an error processing your deposit. \n Please try again.",
+        {
+          style: {
+            background: "#f87171",
+            color: "#fff",
+          },
+          icon: "❌",
+        }
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleWithdraw = async () => {
+    if (!publicKey || !selectedPool) return;
+    const connection = new Connection(WALLET_CONFIG.rpcEndpoint);
+    if (withdrawPercentage <= 0) {
+      toast.error("Please select a valid withdrawal percentage.", {
+        style: {
+          background: "#f87171",
+          color: "#fff",
+        },
+        icon: "⚠️",
       });
+      return;
+    }
+    if (withdrawPercentage > 100) {
+      toast.error("Withdrawal percentage cannot exceed 100%.", {
+        style: {
+          background: "#f87171",
+          color: "#fff",
+        },
+        icon: "⚠️",
+      });
+      return;
+    }
+
+    try {
+      setLoading(true);
+      const toastId = toast.loading("Withdrawal requested...");
+
+      const sendTx = await sendFundsTransaction(
+        0.001,
+        publicKey,
+        sendTransaction,
+        connection
+      );
+
+      if (!sendTx.success) {
+        toast.error("Transaction failed", { id: toastId });
+        return;
+      }
+
+      const axiosWithdrawResponse = await axios.post(apiUrl + "dlmm/unstake", {
+        userPublicKey: publicKey.toBase58(),
+        unstakePercentage: withdrawPercentage,
+      });
+
+      const data = axiosWithdrawResponse.data;
+
+      if (axiosWithdrawResponse.status === 202 && data.txId) {
+        toast.loading("Processing withdrawal transaction...", { id: toastId });
+
+        const onComplete = (result: any): void => {
+          toast.success(
+            `Withdrawal successful.\n You have withdrawn ${withdrawPercentage}% of your stake from ${selectedPool.name}`,
+            {
+              id: toastId,
+            }
+          );
+        };
+
+        const onFail = (error: string): void => {
+          toast.error(`Withdrawal failed: ${error}`, {
+            id: toastId,
+          });
+        };
+
+        monitorTransaction(data.txId, onComplete, onFail);
+      } else {
+        toast.error(`Withdrawal failed: ${data.error || "Unknown error"}`, {
+          id: toastId,
+        });
+      }
+
+      setWithdrawPercentage(0);
+    } catch (error) {
+      console.error("Error withdrawing:", error);
+      toast.error(
+        "There was an error processing your withdrawal. \n Please try again.",
+        {
+          style: {
+            background: "#f87171",
+            color: "#fff",
+          },
+          icon: "❌",
+        }
+      );
     } finally {
       setLoading(false);
     }
@@ -357,114 +527,271 @@ const Dashboard: React.FC = () => {
                   Deposit
                 </h2>
                 {selectedPool ? (
-                  <Card
-                    className={`backdrop-blur-sm border ${
-                      theme === "dark"
-                        ? "bg-white/5 border-white/10"
-                        : "bg-white border-gray-200"
-                    }`}
-                  >
-                    <CardContent className="pt-6">
-                      <div className="space-y-4">
-                        <div>
-                          <label
-                            className={`text-sm mb-2 block ${
-                              theme === "dark"
-                                ? "text-white/60"
-                                : "text-gray-600"
-                            }`}
-                          >
-                            Amount to Deposit
-                          </label>
-                          <Input
-                            type="number"
-                            value={depositAmount}
-                            onChange={(e) => setDepositAmount(e.target.value)}
-                            placeholder={`Enter amount (${selectedPool.minDeposit} - ${selectedPool.depositCap})`}
-                            className={`${
-                              theme === "dark"
-                                ? "bg-white/5 border-white/10 text-white placeholder:text-white/40"
-                                : "bg-white border-gray-200 text-gray-900 placeholder:text-gray-400"
-                            }`}
-                            min={selectedPool.minDeposit}
-                            max={selectedPool.depositCap}
-                            step="0.000001"
-                          />
-                        </div>
-                        <div className="space-y-2">
-                          <div className="flex justify-between text-sm">
-                            <span
-                              className={
+                  <>
+                    <Card
+                      className={`backdrop-blur-sm border ${
+                        theme === "dark"
+                          ? "bg-white/5 border-white/10"
+                          : "bg-white border-gray-200"
+                      }`}
+                    >
+                      <CardContent className="pt-6">
+                        <div className="space-y-4">
+                          <div>
+                            <label
+                              className={`text-sm mb-2 block ${
                                 theme === "dark"
                                   ? "text-white/60"
                                   : "text-gray-600"
-                              }
+                              }`}
                             >
-                              Min Deposit
-                            </span>
-                            <span>
-                              {selectedPool.minDeposit}{" "}
-                              {selectedPool.depositToken}
-                            </span>
-                          </div>
-                          <div className="flex justify-between text-sm">
-                            <span
-                              className={
+                              Amount to Deposit
+                            </label>
+                            <Input
+                              type="number"
+                              value={depositAmount}
+                              onChange={(e) => setDepositAmount(e.target.value)}
+                              placeholder={`Enter amount (${selectedPool.minDeposit} - ${selectedPool.depositCap})`}
+                              className={`${
                                 theme === "dark"
-                                  ? "text-white/60"
-                                  : "text-gray-600"
-                              }
-                            >
-                              Max Deposit
-                            </span>
-                            <span>
-                              {selectedPool.depositCap}{" "}
-                              {selectedPool.depositToken}
-                            </span>
+                                  ? "bg-white/5 border-white/10 text-white placeholder:text-white/40"
+                                  : "bg-white border-gray-200 text-gray-900 placeholder:text-gray-400"
+                              }`}
+                              min={selectedPool.minDeposit}
+                              max={selectedPool.depositCap}
+                              step="0.000001"
+                            />
                           </div>
-                          <div className="flex justify-between text-sm">
-                            <span
-                              className={
-                                theme === "dark"
-                                  ? "text-white/60"
-                                  : "text-gray-600"
-                              }
-                            >
-                              Lockup Period
-                            </span>
-                            <span>{selectedPool.lockupPeriod} days</span>
-                          </div>
-                          <div className="flex justify-between text-sm">
-                            <span
-                              className={
-                                theme === "dark"
-                                  ? "text-white/60"
-                                  : "text-gray-600"
-                              }
-                            >
-                              Expected APY
-                            </span>
-                            <span className="text-blue-400 font-semibold">
-                              {selectedPool.apy}%
-                            </span>
-                          </div>
-                        </div>
-                        <Button
-                          onClick={handleDeposit}
-                          disabled={loading}
-                          className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
-                        >
-                          {loading ? (
-                            <div className="flex items-center gap-2">
-                              <Loader size="sm" text="" /> Processing...
+                          <div className="space-y-2">
+                            <div className="flex justify-between text-sm">
+                              <span
+                                className={
+                                  theme === "dark"
+                                    ? "text-white/60"
+                                    : "text-gray-600"
+                                }
+                              >
+                                Min Deposit
+                              </span>
+                              <span>
+                                {selectedPool.minDeposit}{" "}
+                                {selectedPool.depositToken}
+                              </span>
                             </div>
-                          ) : (
-                            "Deposit"
-                          )}
-                        </Button>
-                      </div>
-                    </CardContent>
-                  </Card>
+                            <div className="flex justify-between text-sm">
+                              <span
+                                className={
+                                  theme === "dark"
+                                    ? "text-white/60"
+                                    : "text-gray-600"
+                                }
+                              >
+                                Max Deposit
+                              </span>
+                              <span>
+                                {selectedPool.depositCap}{" "}
+                                {selectedPool.depositToken}
+                              </span>
+                            </div>
+                            <div className="flex justify-between text-sm">
+                              <span
+                                className={
+                                  theme === "dark"
+                                    ? "text-white/60"
+                                    : "text-gray-600"
+                                }
+                              >
+                                Lockup Period
+                              </span>
+                              <span>{selectedPool.lockupPeriod} days</span>
+                            </div>
+                            <div className="flex justify-between text-sm">
+                              <span
+                                className={
+                                  theme === "dark"
+                                    ? "text-white/60"
+                                    : "text-gray-600"
+                                }
+                              >
+                                Expected APY
+                              </span>
+                              <span className="text-blue-400 font-semibold">
+                                {selectedPool.apy}%
+                              </span>
+                            </div>
+                          </div>
+                          <Button
+                            onClick={handleDeposit}
+                            disabled={loading}
+                            className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+                          >
+                            {loading ? (
+                              <div className="flex items-center gap-2">
+                                <Loader size="sm" text="" /> Processing...
+                              </div>
+                            ) : (
+                              "Deposit"
+                            )}
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                    <Card
+                      className={`backdrop-blur-sm border mt-6 ${
+                        theme === "dark"
+                          ? "bg-white/5 border-white/10"
+                          : "bg-white border-gray-200"
+                      }`}
+                    >
+                      <CardContent className="pt-6">
+                        <div className="space-y-4">
+                          {/* User Staking Info */}
+                          <div>
+                            <h3
+                              className={`text-lg font-bold ${
+                                theme === "dark" ? "text-white" : "text-black"
+                              }`}
+                            >
+                              Staking Information
+                            </h3>
+                            <div className="space-y-2 text-sm">
+                              <div className="flex justify-between">
+                                <span
+                                  className={`${
+                                    theme === "dark"
+                                      ? "text-white/60"
+                                      : "text-gray-600"
+                                  }`}
+                                >
+                                  Total SOL in Pool
+                                </span>
+                                <span>{userData?.pool.totalSOL} SOL</span>
+                              </div>
+                              <div className="flex justify-between">
+                                <span
+                                  className={`${
+                                    theme === "dark"
+                                      ? "text-white/60"
+                                      : "text-gray-600"
+                                  }`}
+                                >
+                                  Your Share Points
+                                </span>
+                                <span>{userData?.user.sharePoints}</span>
+                              </div>
+                              <div className="flex justify-between">
+                                <span
+                                  className={`${
+                                    theme === "dark"
+                                      ? "text-white/60"
+                                      : "text-gray-600"
+                                  }`}
+                                >
+                                  Ownership Percentage
+                                </span>
+                                <span>{userData?.user.ownershipPercent}%</span>
+                              </div>
+                              <div className="flex justify-between">
+                                <span
+                                  className={`${
+                                    theme === "dark"
+                                      ? "text-white/60"
+                                      : "text-gray-600"
+                                  }`}
+                                >
+                                  Estimated Value in SOL
+                                </span>
+                                <span>
+                                  {userData?.user.estimatedValueInSOL * 10} SOL
+                                </span>
+                              </div>
+                              <div className="flex justify-between">
+                                <span
+                                  className={`${
+                                    theme === "dark"
+                                      ? "text-white/60"
+                                      : "text-gray-600"
+                                  }`}
+                                >
+                                  Total Deposited
+                                </span>
+                                <span>
+                                  {userData?.user.totalDeposited * 2} SOL
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Slider for Withdrawal */}
+                          <div>
+                            <label
+                              className={`text-sm ${
+                                theme === "dark"
+                                  ? "text-white/60"
+                                  : "text-gray-600"
+                              }`}
+                            >
+                              Withdrawal Percentage
+                            </label>
+                            <input
+                              type="range"
+                              min="0"
+                              max="100"
+                              value={withdrawPercentage}
+                              onChange={(e) =>
+                                setWithdrawPercentage(Number(e.target.value))
+                              }
+                              className="w-full"
+                            />
+                            <div className="flex justify-between text-sm mt-1">
+                              <span
+                                className={`${
+                                  theme === "dark"
+                                    ? "text-white/60"
+                                    : "text-gray-600"
+                                }`}
+                              >
+                                0%
+                              </span>
+                              <span
+                                className={`${
+                                  theme === "dark"
+                                    ? "text-white/60"
+                                    : "text-gray-600"
+                                }`}
+                              >
+                                {withdrawPercentage}%
+                              </span>
+                              <span
+                                className={`${
+                                  theme === "dark"
+                                    ? "text-white/60"
+                                    : "text-gray-600"
+                                }`}
+                              >
+                                100%
+                              </span>
+                            </div>
+                          </div>
+
+                          {/* Withdraw Button */}
+                          <Button
+                            onClick={handleWithdraw}
+                            disabled={loading || withdrawPercentage === 0}
+                            className="w-full bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800"
+                          >
+                            {loading ? (
+                              <div className="flex items-center gap-2">
+                                <Loader size="sm" text="" /> Processing...
+                              </div>
+                            ) : (
+                              `Withdraw ${withdrawPercentage}%`
+                            )}
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
                 ) : (
                   <Card
                     className={`backdrop-blur-sm border ${
